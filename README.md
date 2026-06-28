@@ -17,7 +17,13 @@ goal-prompt/
 
 ## Installation / Packaging
 
-Copy the `goal-prompt/` directory into a Codex skills directory, for example:
+One-line install:
+
+```bash
+tmpdir="$(mktemp -d)" && git clone --depth 1 https://github.com/kt-aicoding/skill-goal.git "$tmpdir" && mkdir -p "${CODEX_HOME:-$HOME/.codex}/skills" && rm -rf "${CODEX_HOME:-$HOME/.codex}/skills/goal-prompt" && cp -R "$tmpdir/goal-prompt" "${CODEX_HOME:-$HOME/.codex}/skills/goal-prompt"
+```
+
+For local development, copy the `goal-prompt/` directory into a Codex skills directory:
 
 ```bash
 cp -R goal-prompt "${CODEX_HOME:-$HOME/.codex}/skills/"
@@ -74,7 +80,7 @@ PY
 Optional Codex skill validation, if you have the `skill-creator` system skill available:
 
 ```bash
-python3 /path/to/skill-creator/scripts/quick_validate.py goal-prompt
+python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py" goal-prompt
 ```
 
 Expected output:
