@@ -1,4 +1,4 @@
 interface:
   display_name: "Goal Prompt"
   short_description: "Create durable, verifiable long-run goals"
-  default_prompt: "Use $goal-prompt to turn this work request into a durable, verifiable long-running goal prompt."
+  default_prompt: "Use $goal-prompt to convert the user's work request into a reusable long-running goal prompt with scope, milestones, blocker policy, completion audit criteria, a short create_goal objective, assumptions, and pause conditions."
