@@ -31,7 +31,8 @@ The actual skill name is defined in `goal-prompt/SKILL.md` as `goal-prompt`.
 - Design a long-running migration, deployment, QA, audit, or documentation goal.
 - Define per-project execution loops and blocker policy.
 - Write completion criteria that require real evidence rather than intent.
-- Produce a shorter `create_goal` objective string from a full goal prompt.
+- Produce a short `/goal` command and compact `create_goal` objective from a full goal prompt.
+- Split complex goals into a durable instruction file plus a short objective when the `/goal` limit would be exceeded.
 
 ## Trigger Examples
 
@@ -40,6 +41,7 @@ Good trigger requests:
 - `Use $goal-prompt to design a resumable goal for migrating every repo in this workspace.`
 - `Create a /goal objective with done criteria and blocker policy for this deployment audit.`
 - `Turn this vague multi-project cleanup into a long-running goal prompt.`
+- `My /goal objective exceeded 4,000 characters; rewrite it as a file-backed goal.`
 
 Non-trigger requests:
 
@@ -87,6 +89,7 @@ Skill is valid!
 - Use secret names, env var names, secret-manager references, or access prerequisites instead.
 - Require redacted field-level verification if local credential diagnosis is explicitly needed.
 - Pause before destructive actions, paid operations, broad rewrites, or irreversible production changes unless the user already authorized them.
+- Keep paste-ready `/goal` and `create_goal` objectives below platform limits; put long instructions in a referenced file.
 
 ## Notes
 

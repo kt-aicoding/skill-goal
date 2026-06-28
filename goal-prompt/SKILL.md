@@ -7,7 +7,7 @@ description: Draft or improve durable Codex `/goal` prompts and active-goal obje
 
 ## Purpose
 
-Turn a broad work request into a goal prompt that an agent can execute for hours, resume safely, verify objectively, and close only when evidence proves completion.
+Turn a broad work request into a goal prompt that an agent can execute for hours, resume safely, verify objectively, and close only when evidence proves completion. Codex `/goal` objectives have a hard length limit, so this skill must produce a short executable objective and move detailed instructions into a referenced file when needed.
 
 For detailed templates and examples, read `references/goal-prompt-patterns.md`.
 
@@ -63,7 +63,13 @@ For detailed templates and examples, read `references/goal-prompt-patterns.md`.
    - Separate autonomous actions from pause-for-confirmation actions.
    - Never output or commit secrets.
 
-7. Specify final reporting.
+7. Choose inline vs file-backed delivery.
+   - If the complete goal would likely exceed 3,500 characters, do not output it as the `/goal` objective.
+   - Use a file-backed goal: provide or create a `docs/goal.md`, `docs/goals/<slug>.md`, or similarly stable instruction file, then make the `/goal` objective a short command to follow that file.
+   - Keep the actual `/goal` command and `create_goal objective` comfortably under 4,000 characters; target 500-1,200 characters.
+   - The short objective must include the outcome, scope, required instruction file, verification requirement, secret safety, blocker policy, and completion audit trigger.
+
+8. Specify final reporting.
    - Require a concise per-item summary with repo, branch, commit, deployment target, validation results, unresolved blockers, and dirty-worktree notes.
    - Include ledger/audit file paths updated during the run.
 
@@ -85,6 +91,8 @@ Every full generated goal should include these sections unless the user asks for
 - `Done when`: measurable completion criteria.
 - `Verification`: commands, live checks, audits, or review states that prove completion.
 - `If blocked`: if-then rules for common blockers and pause conditions.
+
+For complex work, put these sections in the instruction file rather than the `/goal` objective itself.
 
 ## Quality Bar
 
@@ -124,9 +132,12 @@ Avoid these weak goal shapes:
 
 When the user asks for a goal prompt, output:
 
-1. `Final goal objective`: a full reusable goal prompt in a fenced code block.
-2. `create_goal objective`: a shorter single-string objective when useful.
-3. `Why this is measurable`: one short explanation of the completion signal.
-4. `Assumptions`: only material assumptions the agent may proceed under.
-5. `Pause conditions`: when the agent should stop and ask the user.
-6. `Optional refinements`: 2-3 questions only if they materially improve the goal.
+1. `Instruction file`: for complex goals, a recommended path and complete file content in a fenced code block. If the user asked you to update the current workspace and it is safe, create the file instead of only showing it.
+2. `Short /goal command`: a paste-ready objective that is always under 4,000 characters and normally under 1,200 characters. If an instruction file exists, this should say to follow that file.
+3. `create_goal objective`: a compact single-string objective for `create_goal`; keep it under 1,200 characters and never put the full long plan here.
+4. `Why this is measurable`: one short explanation of the completion signal.
+5. `Assumptions`: only material assumptions the agent may proceed under.
+6. `Pause conditions`: when the agent should stop and ask the user.
+7. `Optional refinements`: 2-3 questions only if they materially improve the goal.
+
+Never return a `/goal` objective longer than 4,000 characters. If the full goal is long, the correct output is a short objective that references a durable instruction file.

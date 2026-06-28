@@ -27,14 +27,34 @@ Useful public references:
 
 Return these fields when generating a goal prompt:
 
-- `Final goal objective`: a polished, reusable goal prompt.
-- `create_goal objective`: a compact single-string objective when useful.
+- `Instruction file`: for complex goals, a recommended path and complete file content, or a note that the file was created/updated.
+- `Short /goal command`: a paste-ready objective under 4,000 characters; target 500-1,200 characters.
+- `create_goal objective`: a compact single-string objective under 1,200 characters when useful.
 - `Why this is measurable`: one short explanation of the completion signal.
 - `Assumptions`: assumptions the agent may safely proceed under.
 - `Pause conditions`: when the agent should stop and ask the user.
 - `Optional refinements`: up to three questions that materially improve scope or validation.
 
+Do not return a 4,000+ character `/goal` objective. If the full prompt is long, put the durable instructions in a file and make the objective reference that file.
+
+## Length Budget Policy
+
+Codex `/goal` has a hard objective limit. Use these budgets:
+
+- Short `/goal command`: must be under 4,000 characters; target 500-1,200.
+- `create_goal objective`: target 300-900 characters; never use it for the full plan.
+- Instruction file content: may be long and should contain the full sections, loops, blockers, and audits.
+
+Use inline-only output only when the complete objective is comfortably short. Use file-backed output when any of these are true:
+
+- The goal spans multiple repos, machines, deployments, audits, or docs.
+- The goal needs a per-item loop plus detailed blocker policy.
+- The goal includes many validators or completion-audit requirements.
+- A previous attempt hit the 4,000-character objective limit.
+
 ## Full Goal Prompt Skeleton
+
+Use this skeleton inside an instruction file for complex goals:
 
 ```text
 Goal:
@@ -102,12 +122,32 @@ Final report:
 - State any remaining non-goal cleanup separately.
 ```
 
+## File-backed `/goal` Shape
+
+Use this when the full goal is too long for `/goal`:
+
+```text
+/goal Follow the durable instructions in <path-to-goal-file>. Complete <short outcome> across <scope>; for each item run the file's loop, verify with current-state evidence, update the ledger/audit, protect dirty work and secrets, record external blockers with next actions, and mark complete only after the file's completion audit proves every requirement is done or acceptably blocked.
+```
+
+Example:
+
+```text
+/goal Follow docs/goals/openclaw-fleet-optimization.md. Explore, repair, optimize, verify, and document the in-scope OpenClaw machines and kt-aicoding/claws repository; use the file's per-machine loop, no-secret policy, validation commands, blocker rules, and completion audit; continue safe work across other machines when one item is externally blocked.
+```
+
 ## `create_goal` Objective Shape
 
 Use a compact objective when a tool accepts only a single objective string:
 
 ```text
 Complete <outcome> across <scope>; for each item run <loop>; verify with <commands/live checks>; commit/push or publish related changes; update <ledger>; protect dirty work and secrets; record external blockers with next actions and continue; mark complete only after a current-state completion audit proves every requirement is done or acceptably blocked.
+```
+
+For file-backed goals, prefer:
+
+```text
+Follow <path-to-goal-file> to complete <outcome> across <scope>; run the per-item loop, verify with current-state evidence, update the ledger/audit, protect dirty work and secrets, continue past recorded external blockers, and mark complete only after the file's completion audit passes.
 ```
 
 ## Batch Project Goal Pattern
@@ -164,6 +204,7 @@ Use these cases to test whether the skill triggers appropriately and produces me
 - Positive: "Create a long-running deployment goal for verifying Vercel and Supabase production."
 - Positive: "Turn this vague audit request into a resumable goal with blockers and completion criteria."
 - Positive: "Make a compact create_goal objective for a multi-week documentation cleanup."
+- Positive: "My /goal objective exceeded 4,000 characters; rewrite it as a file-backed goal."
 - Negative: "Fix this TypeScript error now."
 - Negative: "Brainstorm names for my app."
 - Negative: "Write a one-paragraph marketing slogan."
@@ -172,6 +213,20 @@ Use these cases to test whether the skill triggers appropriately and produces me
 Score each case on trigger accuracy, measurable done criteria, blocker policy, safety thresholds, and output shape.
 
 ## Example: Long Migration Goal
+
+Instruction file path:
+
+```text
+docs/goals/provider-migration.md
+```
+
+Short `/goal command`:
+
+```text
+/goal Follow docs/goals/provider-migration.md. Complete the provider migration for all in-scope projects; process one project at a time, verify with current local/live evidence, push related commits, update the checklist, protect dirty work and secrets, record external blockers with next actions, and mark complete only after the file's completion audit passes.
+```
+
+Instruction file summary:
 
 ```text
 Complete the remaining provider migration for all projects under /path/to/projects. Use the local migration skill and checklist. For each project, scan old provider usage, migrate runtime configuration, update deployment secrets, run local validators and real smoke tests, verify the live domain when present, commit/push to GitHub, and update the migration checklist. Do not output or commit real API keys. If platform login, database schema, special model capability, or unavailable local tooling blocks an item, record the blocker and continue the next project. Mark complete only after a current-state audit proves no unrecorded production runtime dependency remains and all P0/P1 projects are completed, not applicable, or externally blocked with next actions.
